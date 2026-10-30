@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manette Virtuelle – Ton téléphone fait le Bluetooth de ton PC</title>
+<meta name="description" content="Utilise ta manette Bluetooth sur un PC sans Bluetooth : ton téléphone la relaie au PC en Wi-Fi. Gratuit, simple, sécurisé par un code de connexion.">
+<style>
+:root{--bg:#0f1218;--card:#181c25;--line:#2d3342;--on:#35c2ff;--txt:#e8ecf4;--mut:#8b94a8}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.6}
+a{color:var(--on)}
+.wrap{max-width:900px;margin:0 auto;padding:0 20px}
+header{padding:70px 0 50px;text-align:center}
+h1{font-size:clamp(34px,7vw,56px);margin:0 0 14px;line-height:1.1}
+h1 span{color:var(--on)}
+.sous{font-size:clamp(17px,3vw,21px);color:var(--mut);max-width:620px;margin:0 auto 32px}
+.boutons{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-block;padding:15px 28px;border-radius:12px;font-size:17px;font-weight:600;text-decoration:none}
+.btn.prim{background:var(--on);color:#04141c}
+.btn.sec{background:var(--card);color:var(--txt);border:1px solid var(--line)}
+.btn:hover{filter:brightness(1.1)}
+.petit{color:var(--mut);font-size:14px;margin-top:16px}
+section{padding:44px 0}
+h2{font-size:28px;margin:0 0 24px;text-align:center}
+.grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.carte{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px}
+.carte h3{margin:0 0 8px;font-size:18px}
+.carte p{margin:0;color:var(--mut);font-size:15px}
+.num{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;
+  background:var(--on);color:#04141c;font-weight:700;margin-bottom:12px}
+details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 18px;margin-bottom:10px}
+summary{font-weight:600;cursor:pointer}
+details p{color:var(--mut);margin:10px 0 0;font-size:15px}
+.don{text-align:center;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:36px 20px}
+.don p{color:var(--mut);max-width:520px;margin:0 auto 22px}
+footer{padding:36px 0 50px;text-align:center;color:var(--mut);font-size:14px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>Ton téléphone fait<br>le <span>Bluetooth</span> de ton PC</h1>
+    <p class="sous">Connecte ta manette en Bluetooth à ton téléphone : il la transmet à ton PC en Wi-Fi. Pas besoin de Bluetooth sur le PC, pas de câble.</p>
+    <div class="boutons">
+      <a class="btn prim" href="LIEN_TELECHARGEMENT">⬇ Télécharger pour Windows</a>
+      <a class="btn sec" href="#don">☕ Soutenir le projet</a>
+    </div>
+    <p class="petit">Gratuit · Windows 10 et 11 · Le code source est public</p>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2>Comment ça marche</h2>
+    <div class="grille">
+      <div class="carte"><div class="num">1</div><h3>Installe sur ton PC</h3><p>Télécharge l'installateur et lance-le. Il installe aussi le pilote nécessaire pour que Windows reconnaisse la manette.</p></div>
+      <div class="carte"><div class="num">2</div><h3>Relie ta manette au téléphone</h3><p>Associe ta manette à ton téléphone en Bluetooth, comme d'habitude. Puis ouvre dans le navigateur du téléphone l'adresse affichée par le programme et tape le code à 4 chiffres.</p></div>
+      <div class="carte"><div class="num">3</div><h3>Joue sur ton PC</h3><p>Ton PC voit une manette de type Xbox 360. Elle fonctionne avec les jeux qui acceptent une manette.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Ce que tu peux faire</h2>
+    <div class="grille">
+      <div class="carte"><h3>📡 Ta manette Bluetooth sur PC</h3><p>Boutons, sticks et gâchettes de ta manette sont transmis au PC, palettes de dos comprises (tu choisis à quel bouton elles correspondent).</p></div>
+      <div class="carte"><h3>👆 Manette tactile en secours</h3><p>Pas de manette sous la main ? Utilise l'écran du téléphone : boutons, croix directionnelle, sticks et gâchettes.</p></div>
+      <div class="carte"><h3>🔒 Protégé par un code</h3><p>Un nouveau code est généré à chaque lancement. Personne d'autre sur ton réseau ne peut prendre le contrôle.</p></div>
+      <div class="carte"><h3>⚡ Faible latence</h3><p>La latence s'affiche en direct sur ton téléphone pour que tu saches où tu en es.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Questions fréquentes</h2>
+    <details><summary>Windows affiche « Windows a protégé votre ordinateur »</summary>
+      <p>C'est normal : le programme n'est pas signé par un éditeur payant. Clique sur « Informations complémentaires » puis « Exécuter quand même ». Le code source est public si tu veux vérifier ce que fait le programme.</p></details>
+    <details><summary>Mon antivirus signale le fichier</summary>
+      <p>Les programmes créés avec Python déclenchent parfois de fausses alertes. Tu peux consulter le code source sur GitHub, ou ajouter une exception pour le dossier du programme.</p></details>
+    <details><summary>Le téléphone n'arrive pas à se connecter</summary>
+      <p>Vérifie que le PC et le téléphone sont sur le même réseau Wi-Fi, et que tu as autorisé le programme sur les réseaux privés dans le pare-feu Windows lors du premier lancement.</p></details>
+    <details><summary>Pourquoi un pilote est-il installé ?</summary>
+      <p>Le pilote ViGEmBus permet à Windows de voir une manette virtuelle. Sans lui, aucun jeu ne peut recevoir les commandes.</p></details>
+    <details><summary>Mon PC n'a pas de Bluetooth, ça marche ?</summary>
+      <p>Oui, c'est fait pour ça. Seul ton téléphone a besoin du Bluetooth. Le PC, lui, reçoit tout par le réseau : il doit simplement être sur le même Wi-Fi (ou relié par câble au même réseau) que le téléphone.</p></details>
+    <details><summary>Quelles manettes sont compatibles ?</summary>
+      <p>Celles que ton téléphone reconnaît en Bluetooth et que son navigateur sait lire. Les manettes courantes de type Xbox ou PlayStation fonctionnent généralement, mais ça peut varier selon le téléphone.</p></details>
+    <details><summary>Ça marche sur Mac, Linux ou console ?</summary>
+      <p>Non, uniquement Windows pour l'instant. Le téléphone peut être un Android ou un iPhone, il suffit d'un navigateur.</p></details>
+  </div>
+</section>
+
+<section id="don">
+  <div class="wrap">
+    <div class="don">
+      <h2>Soutenir le projet</h2>
+      <p>Manette Virtuelle est gratuite. Si elle te rend service, un petit don m'aide à continuer à l'améliorer. Merci !</p>
+      <a class="btn prim" href="LIEN_DON">☕ Faire un don</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <a href="LIEN_GITHUB">Code source sur GitHub</a> · <a href="LIEN_GITHUB/issues">Donner un avis ou signaler un problème</a>
+    <p>Projet indépendant, non affilié à Microsoft ni à Sony.</p>
+  </div>
+</footer>
+
+</body>
+</html>
