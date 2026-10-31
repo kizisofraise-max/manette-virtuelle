@@ -1,4 +1,4 @@
-import sys, asyncio, json, socket, threading, http.server, secrets, time
+import sys, os, io, base64, asyncio, json, socket, threading, http.server, secrets, time
 from urllib.parse import urlparse
 import websockets, vgamepad as vg
 
@@ -560,9 +560,14 @@ boucle();
 
 def quitter_avec_message(texte):
     print("\n" + texte)
-    try:
-        input("\nAppuie sur Entrée pour fermer...")
-    except EOFError:
+    try:                                         # fenêtre d'erreur (le programme n'a pas de console)
+        import tkinter as tk
+        from tkinter import messagebox
+        r = tk.Tk()
+        r.withdraw()
+        messagebox.showerror("Manette Virtuelle", texte)
+        r.destroy()
+    except Exception:
         pass
     sys.exit(1)
 
@@ -741,9 +746,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
 
 async def main():
-    threading.Thread(
-        target=http.server.ThreadingHTTPServer(("0.0.0.0", 8000), Handler).serve_forever,
-        daemon=True).start()
+    serveur_http = http.server.ThreadingHTTPServer(("0.0.0.0", 8000), Handler)
+    threading.Thread(target=serveur_http.serve_forever, daemon=True).start()
     print("\n=== Serveur manette pret ===")
     print(f"Sur le telephone (Chrome/Safari) :  http://{IP_PC}:8000")
     print(f"CODE DE CONNEXION : {CODE}")
@@ -752,12 +756,150 @@ async def main():
         await asyncio.Future()
 
 
+erreur_serveur = []
+
+
+def lancer_serveur():
+    try:
+        asyncio.run(main())
+    except OSError as e:
+        erreur_serveur.append(
+            "Impossible de démarrer le serveur (port 8000 ou 8765 déjà utilisé ?).\n"
+            "Ferme l'autre instance de Manette Virtuelle puis relance.\n"
+            f"Détail : {e}")
+    except Exception as e:
+        erreur_serveur.append(f"Le serveur s'est arrêté : {e}")
+
+
+# ---------- Fenêtre du programme (adresse + code à 4 chiffres) ----------
+def ressource(nom):
+    base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base, nom)
+
+
+def nb_appareils():
+    try:
+        return sum(1 for c in list(clients) if ip_de(c) not in LOCAL)
+    except Exception:
+        return 0
+
+
+def image_qr(url):
+    """QR code de l'adresse (PNG en base64), ou None si indisponible."""
+    try:
+        import segno
+        tampon = io.BytesIO()
+        segno.make(url, error="m").save(tampon, kind="png", scale=5, border=2)
+        return base64.b64encode(tampon.getvalue()).decode("ascii")
+    except Exception:
+        return None
+
+
+def fenetre():
+    import tkinter as tk
+    try:                                         # texte net sur les écrans à forte résolution
+        import ctypes
+        ctypes.windll.shcore.SetProcessDpiAwareness(1)
+    except Exception:
+        pass
+
+    BG, CARTE, LIGNE = "#0f1218", "#181c25", "#2d3342"
+    ACC, TXT, MUT, VERT, ROUGE = "#35c2ff", "#e8ecf4", "#8b94a8", "#30c48d", "#e5484d"
+    url = f"http://{IP_PC}:8000"
+
+    racine = tk.Tk()
+    racine.title("Manette Virtuelle")
+    racine.configure(bg=BG)
+    racine.resizable(False, False)
+    try:
+        racine.iconbitmap(ressource("icone.ico"))
+    except Exception:
+        pass
+
+    def carte():
+        return tk.Frame(racine, bg=CARTE, highlightbackground=LIGNE,
+                        highlightthickness=1, padx=18, pady=14)
+
+    tk.Label(racine, text="Manette Virtuelle", bg=BG, fg=TXT,
+             font=("Segoe UI", 20, "bold")).pack(padx=28, pady=(20, 2))
+    ligne = tk.Frame(racine, bg=BG)
+    ligne.pack()
+    point = tk.Label(ligne, text="●", bg=BG, fg=ROUGE, font=("Segoe UI", 12))
+    point.pack(side="left")
+    etat = tk.Label(ligne, text="En attente du téléphone...", bg=BG, fg=MUT,
+                    font=("Segoe UI", 11))
+    etat.pack(side="left", padx=(6, 0))
+
+    # Étape 1 : l'adresse
+    c1 = carte()
+    c1.pack(fill="x", padx=28, pady=(16, 8))
+    tk.Label(c1, text="1.  Sur ton téléphone, ouvre cette adresse :", bg=CARTE, fg=MUT,
+             font=("Segoe UI", 11), anchor="w").pack(fill="x")
+    tk.Label(c1, text=url, bg=CARTE, fg=ACC,
+             font=("Consolas", 18, "bold")).pack(pady=(8, 8))
+    bouton = tk.Button(c1, text="Copier l'adresse", bg="#2b3140", fg=TXT,
+                       activebackground="#3a4254", activeforeground=TXT, relief="flat",
+                       font=("Segoe UI", 10), padx=12, pady=4, cursor="hand2")
+    bouton.pack()
+
+    def copier():
+        racine.clipboard_clear()
+        racine.clipboard_append(url)
+        bouton.config(text="Copié ✓")
+        racine.after(1500, lambda: bouton.config(text="Copier l'adresse"))
+    bouton.config(command=copier)
+
+    # Étape 2 : le code
+    c2 = carte()
+    c2.pack(fill="x", padx=28, pady=8)
+    tk.Label(c2, text="2.  Tape ce code sur le téléphone :", bg=CARTE, fg=MUT,
+             font=("Segoe UI", 11), anchor="w").pack(fill="x")
+    tk.Label(c2, text="  ".join(CODE), bg=CARTE, fg=TXT,
+             font=("Consolas", 54, "bold")).pack(pady=(6, 0))
+
+    # QR code (facultatif)
+    donnees_qr = image_qr(url)
+    if donnees_qr:
+        try:
+            photo = tk.PhotoImage(data=donnees_qr)
+            racine._photo_qr = photo             # garde l'image en vie
+            tk.Label(racine, text="ou scanne ce QR code avec ton téléphone", bg=BG, fg=MUT,
+                     font=("Segoe UI", 10)).pack(pady=(10, 4))
+            tk.Label(racine, image=photo, bg=BG).pack()
+        except Exception:
+            pass
+
+    tk.Label(racine, text="Le téléphone et le PC doivent être sur le même Wi-Fi.\n"
+                          "Garde cette fenêtre ouverte pendant que tu joues. La fermer arrête le programme.",
+             bg=BG, fg=MUT, font=("Segoe UI", 9), justify="center").pack(padx=28, pady=(14, 20))
+
+    def maj():
+        if erreur_serveur:
+            from tkinter import messagebox
+            messagebox.showerror("Manette Virtuelle", erreur_serveur[0])
+            racine.destroy()
+            return
+        n = nb_appareils()
+        if n:
+            point.config(fg=VERT)
+            etat.config(fg=VERT, text="1 téléphone connecté" if n == 1 else f"{n} appareils connectés")
+        else:
+            point.config(fg=ROUGE)
+            etat.config(fg=MUT, text="En attente du téléphone...")
+        racine.after(700, maj)
+
+    racine.after(300, maj)
+    racine.mainloop()
+
+
+fil_serveur = threading.Thread(target=lancer_serveur, daemon=True)
+fil_serveur.start()
 try:
-    asyncio.run(main())
-except KeyboardInterrupt:
-    pass
-except OSError as e:
-    quitter_avec_message(
-        "Impossible de démarrer le serveur (port 8000 ou 8765 déjà utilisé ?).\n"
-        "Ferme l'autre instance de Manette Virtuelle puis relance.\n"
-        f"Détail : {e}")
+    fenetre()
+except ImportError:                              # pas de tkinter : on reste en mode console
+    try:
+        fil_serveur.join()
+    except KeyboardInterrupt:
+        pass
+    if erreur_serveur:
+        quitter_avec_message(erreur_serveur[0])
