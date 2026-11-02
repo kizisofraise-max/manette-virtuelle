@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.KeyEvent
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewOutlineProvider
 import android.view.WindowManager
 import android.widget.ImageView
@@ -14,7 +15,8 @@ import android.widget.ImageView
  *  - anneau VERT  : la bulle recoit la manette (et la relaie au PC)
  *  - anneau GRIS  : tu as touche une autre application, touche la bulle pour reprendre la manette
  *  - anneau ROUGE : pas connecte au PC
- * Le doigt et la manette sont distingues par la source de l'evenement.
+ * Quand l'application Manette Virtuelle est ouverte, la bulle se cache et ne prend plus le
+ * focus (sinon le clavier ne pourrait pas s'ouvrir dans l'application).
  */
 class BulleView(contexte: Context) : ImageView(contexte) {
 
@@ -27,7 +29,16 @@ class BulleView(contexte: Context) : ImageView(contexte) {
     private var toucheX = 0f
     private var toucheY = 0f
 
-    private val ecouteur: () -> Unit = { majAffichage() }
+    private val appliquer = Runnable { majFenetre() }
+    private val ecouteur: () -> Unit = {
+        majAffichage()
+        removeCallbacks(appliquer)
+        if (Relais.appAuPremierPlan) {
+            majFenetre()
+        } else {
+            postDelayed(appliquer, 300)
+        }
+    }
 
     init {
         val d = resources.displayMetrics.density
@@ -59,14 +70,34 @@ class BulleView(contexte: Context) : ImageView(contexte) {
         setAlpha(if (focus) 1f else 0.85f)
     }
 
+    /** Application ouverte : bulle invisible, non touchable, sans focus. Sinon : bulle normale. */
+    private fun majFenetre() {
+        val p = params ?: return
+        val wm = gestionnaire ?: return
+        val ouvert = Relais.appAuPremierPlan
+        val masque = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+        val nouveau = if (ouvert) (p.flags or masque) else (p.flags and masque.inv())
+        if (nouveau != p.flags) {
+            p.flags = nouveau
+            try {
+                wm.updateViewLayout(this, p)
+            } catch (e: Exception) {
+            }
+        }
+        setVisibility(if (ouvert) View.GONE else View.VISIBLE)
+        if (!ouvert) requestFocus()
+    }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         Relais.ajouterEcouteur(ecouteur)
         requestFocus()
+        post { majFenetre() }
     }
 
     override fun onDetachedFromWindow() {
         Relais.retirerEcouteur(ecouteur)
+        removeCallbacks(appliquer)
         super.onDetachedFromWindow()
     }
 

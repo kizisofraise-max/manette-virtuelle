@@ -21,7 +21,9 @@ import android.text.InputType
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -39,6 +41,11 @@ class MainActivity : Activity() {
     private lateinit var texteAppareils: TextView
     private lateinit var texteSignal: TextView
     private lateinit var texteBulle: TextView
+    private lateinit var texteManuel: TextView
+    private lateinit var boutonTactile: Button
+    private lateinit var boutonAutoriser: Button
+    private lateinit var boutonAfficher: Button
+    private lateinit var boutonCacher: Button
 
     private var casquesConnus: Set<String>? = null
     private val ecouteurRelais: () -> Unit = { majConnexion() }
@@ -140,22 +147,16 @@ class MainActivity : Activity() {
         c1.addView(texte("1. Connexion au PC", 17f, gras = true))
         c1.addView(
             texte(
-                "Lance le programme sur ton PC, puis recopie ici l'adresse et le code à 4 chiffres affichés dans sa fenêtre.",
+                "Lance le programme sur ton PC, puis tape ici le code à 4 chiffres affiché dans sa fenêtre. " +
+                    "Le téléphone et le PC doivent être sur le même Wi-Fi.",
                 13f, "#8b94a8"
             )
         )
-        champAdresse = EditText(this)
-        champAdresse.hint = "Adresse du PC (ex : 192.168.1.113)"
-        champAdresse.setHintTextColor(Color.parseColor("#6b7488"))
-        champAdresse.setTextColor(Color.WHITE)
-        champAdresse.setSingleLine(true)
-        champAdresse.setText(prefs.getString("adresse", ""))
-        c1.addView(champAdresse)
-
         champCode = EditText(this)
         champCode.hint = "Code à 4 chiffres"
         champCode.setHintTextColor(Color.parseColor("#6b7488"))
         champCode.setTextColor(Color.WHITE)
+        champCode.textSize = 22f
         champCode.inputType = InputType.TYPE_CLASS_NUMBER
         champCode.filters = arrayOf<InputFilter>(InputFilter.LengthFilter(4))
         c1.addView(champCode)
@@ -164,6 +165,21 @@ class MainActivity : Activity() {
         c1.addView(boutonConnexion)
         texteEtat = texte("", 14f)
         c1.addView(texteEtat)
+
+        texteManuel = texte("Ça ne trouve pas mon PC ? Saisir son adresse à la main", 13f, "#35c2ff")
+        texteManuel.setPadding(0, dp(10), 0, dp(4))
+        c1.addView(texteManuel)
+        champAdresse = EditText(this)
+        champAdresse.hint = "Adresse du PC (ex : 192.168.1.113)"
+        champAdresse.setHintTextColor(Color.parseColor("#6b7488"))
+        champAdresse.setTextColor(Color.WHITE)
+        champAdresse.setSingleLine(true)
+        champAdresse.setText(prefs.getString("adresse", ""))
+        champAdresse.visibility = View.GONE
+        c1.addView(champAdresse)
+        texteManuel.setOnClickListener {
+            champAdresse.visibility = if (champAdresse.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+        }
         colonne.addView(c1)
 
         // 2. Appareils
@@ -176,34 +192,54 @@ class MainActivity : Activity() {
         c2.addView(texteSignal)
         colonne.addView(c2)
 
-        // 3. Bulle
+        // 3. Manette tactile de secours
         val c3 = carte()
-        c3.addView(texte("3. Bulle flottante", 17f, gras = true))
+        c3.addView(texte("3. Manette tactile de secours", 17f, gras = true))
         c3.addView(
             texte(
-                "La bulle reste affichée par-dessus les autres applications pour que ta manette continue de fonctionner.\n" +
+                "Pas de manette sous la main ? Utilise l'écran du téléphone comme manette (sticks, croix, boutons, gâchettes). " +
+                    "Disponible une fois connecté au PC.",
+                13f, "#8b94a8"
+            )
+        )
+        boutonTactile = bouton("Ouvrir la manette tactile") {
+            startActivity(Intent(this, ManetteTactileActivity::class.java))
+        }
+        c3.addView(boutonTactile)
+        colonne.addView(c3)
+
+        // 4. Bulle
+        val c4 = carte()
+        c4.addView(texte("4. Bulle flottante", 17f, gras = true))
+        c4.addView(
+            texte(
+                "La bulle apparaît quand tu quittes l'application, par-dessus les autres applications, pour que ta manette continue de fonctionner. " +
+                    "Quand cette application est ouverte, la bulle se cache.\n" +
                     "Anneau vert : manette active. Gris : touche la bulle pour reprendre la manette. Rouge : pas connecté au PC.",
                 13f, "#8b94a8"
             )
         )
         texteBulle = texte("", 14f)
-        c3.addView(texteBulle)
-        c3.addView(bouton("Autoriser la bulle") {
+        c4.addView(texteBulle)
+        boutonAutoriser = bouton("Autoriser la bulle") {
             startActivity(
                 Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
             )
-        })
-        c3.addView(bouton("Afficher la bulle") {
+        }
+        c4.addView(boutonAutoriser)
+        boutonAfficher = bouton("Activer la bulle") {
             if (Settings.canDrawOverlays(this)) {
                 startForegroundService(Intent(this, BulleService::class.java))
             } else {
                 majBulle()
             }
-        })
-        c3.addView(bouton("Cacher la bulle") {
+        }
+        c4.addView(boutonAfficher)
+        boutonCacher = bouton("Désactiver la bulle") {
             stopService(Intent(this, BulleService::class.java))
-        })
-        colonne.addView(c3)
+        }
+        c4.addView(boutonCacher)
+        colonne.addView(c4)
 
         colonne.addView(
             texte(
@@ -231,6 +267,8 @@ class MainActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        Relais.appAuPremierPlan = true
+        Relais.notifier()
         Relais.ajouterEcouteur(ecouteurRelais)
         majConnexion()
         majAppareils()
@@ -240,6 +278,8 @@ class MainActivity : Activity() {
     override fun onPause() {
         Relais.retirerEcouteur(ecouteurRelais)
         EntreeManette.toutRelacher()
+        Relais.appAuPremierPlan = false
+        Relais.notifier()
         super.onPause()
     }
 
@@ -278,10 +318,18 @@ class MainActivity : Activity() {
             Relais.deconnecter()
             return
         }
-        val adresse = champAdresse.text.toString()
-        getSharedPreferences("manette", Context.MODE_PRIVATE)
-            .edit().putString("adresse", Relais.nettoyerAdresse(adresse)).apply()
-        Relais.connecter(adresse, champCode.text.toString().trim())
+        val clavier = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        clavier.hideSoftInputFromWindow(champCode.windowToken, 0)
+
+        val code = champCode.text.toString().trim()
+        val adresse = champAdresse.text.toString().trim()
+        if (champAdresse.visibility == View.VISIBLE && adresse.isNotEmpty()) {
+            getSharedPreferences("manette", Context.MODE_PRIVATE)
+                .edit().putString("adresse", Relais.nettoyerAdresse(adresse)).apply()
+            Relais.connecter(adresse, code)
+        } else {
+            Relais.connecterAuto(this, code)
+        }
     }
 
     private fun majConnexion() {
@@ -294,10 +342,20 @@ class MainActivity : Activity() {
         texteEtat.setTextColor(Color.parseColor(couleur))
         boutonConnexion.text =
             if (Relais.etat == Relais.CONNECTE || Relais.etat == Relais.CONNEXION) "Se déconnecter" else "Se connecter"
+
+        // Tant que le code n'est pas bon, la bulle et la manette tactile sont bloquées
+        val connecte = Relais.etat == Relais.CONNECTE
+        for (b in listOf(boutonTactile, boutonAutoriser, boutonAfficher, boutonCacher)) {
+            b.isEnabled = connecte
+            b.alpha = if (connecte) 1f else 0.4f
+        }
+        majBulle()
     }
 
     private fun majBulle() {
-        texteBulle.text = if (Settings.canDrawOverlays(this)) {
+        texteBulle.text = if (Relais.etat != Relais.CONNECTE) {
+            "Connecte-toi d'abord au PC (étape 1) pour utiliser la bulle."
+        } else if (Settings.canDrawOverlays(this)) {
             "Autorisation d'affichage : OUI"
         } else {
             "Autorisation d'affichage : NON (touche « Autoriser la bulle »)"

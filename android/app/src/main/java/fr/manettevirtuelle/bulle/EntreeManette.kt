@@ -128,6 +128,22 @@ object EntreeManette {
         envoyerEtat()
     }
 
+    /** Manette tactile de secours : l'etat de l'ecran remplace l'etat courant. */
+    fun depuisTactile(b: BooleanArray, sgx: Float, sgy: Float, sdx: Float, sdy: Float, sl: Float, sr: Float) {
+        for (i in boutons.indices) boutons[i] = i < b.size && b[i]
+        gx = sgx
+        gy = sgy
+        dx = sdx
+        dy = sdy
+        lt = sl
+        rt = sr
+        l2 = false
+        r2 = false
+        nbSignaux++
+        dernier = "manette tactile"
+        envoyerEtat()
+    }
+
     private fun envoyerEtat() {
         val sb = StringBuilder("{\"b\":[")
         for (i in 0..16) {
