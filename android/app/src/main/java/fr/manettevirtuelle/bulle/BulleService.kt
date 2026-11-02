@@ -44,10 +44,10 @@ class BulleService : Service() {
         )
         @Suppress("DEPRECATION")
         val notif = Notification.Builder(this, CANAL)
-            .setContentTitle("Manette Bulle (test)")
-            .setContentText("La bulle est affichee. Touche-la pour reprendre la manette.")
+            .setContentTitle("Manette Virtuelle")
+            .setContentText("La bulle est affichée. Touche-la pour reprendre la manette.")
             .setSmallIcon(android.R.drawable.ic_menu_info_details)
-            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Arreter", arret)
+            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Arrêter", arret)
             .build()
 
         if (Build.VERSION.SDK_INT >= 34) {
@@ -67,9 +67,10 @@ class BulleService : Service() {
         val vue = BulleView(this)
         // Fenetre focusable (pas de FLAG_NOT_FOCUSABLE) : c'est elle qui recoit la manette.
         // FLAG_NOT_TOUCH_MODAL : les touches hors de la bulle vont a l'application derriere.
+        val taille = (60 * resources.displayMetrics.density).toInt()
         val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
+            taille,
+            taille,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
             PixelFormat.TRANSLUCENT
@@ -89,6 +90,7 @@ class BulleService : Service() {
     }
 
     override fun onDestroy() {
+        EntreeManette.toutRelacher()
         try {
             bulle?.let { gestionnaire?.removeView(it) }
         } catch (e: Exception) {

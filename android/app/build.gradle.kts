@@ -11,8 +11,18 @@ android {
         applicationId = "fr.manettevirtuelle.bulle"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "0.1-test"
+        versionCode = 2
+        versionName = "0.2"
+    }
+
+    // Cle de signature fixe : les nouvelles versions s'installent par-dessus l'ancienne
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
     }
 
     compileOptions {
@@ -22,4 +32,8 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+}
+
+dependencies {
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }

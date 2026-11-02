@@ -2,106 +2,94 @@ package fr.manettevirtuelle.bulle
 
 import android.content.Context
 import android.graphics.Color
-import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
-import android.util.TypedValue
-import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
+import android.view.ViewOutlineProvider
 import android.view.WindowManager
-import android.widget.TextView
-import java.util.Locale
+import android.widget.ImageView
 
 /**
- * La bulle : une petite fenetre flottante.
- * - Verte quand elle a le "focus" (c'est elle qui recoit la manette).
- * - Grise quand tu as touche une autre application. Retouche-la pour reprendre la manette.
- * - Le doigt (ecran tactile) et la manette sont distingues par la source de l'evenement.
+ * La bulle : un rond avec le logo.
+ *  - anneau VERT  : la bulle recoit la manette (et la relaie au PC)
+ *  - anneau GRIS  : tu as touche une autre application, touche la bulle pour reprendre la manette
+ *  - anneau ROUGE : pas connecte au PC
+ * Le doigt et la manette sont distingues par la source de l'evenement.
  */
-class BulleView(contexte: Context) : TextView(contexte) {
+class BulleView(contexte: Context) : ImageView(contexte) {
 
     var params: WindowManager.LayoutParams? = null
     var gestionnaire: WindowManager? = null
 
-    private var actif = false
-    private var nbSignaux = 0
-    private var appareil = "-"
-    private var dernier = "aucun signal"
-
+    private var focus = false
     private var departX = 0
     private var departY = 0
     private var toucheX = 0f
     private var toucheY = 0f
 
+    private val ecouteur: () -> Unit = { majAffichage() }
+
     init {
         val d = resources.displayMetrics.density
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
-        setTextColor(Color.WHITE)
-        setTypeface(Typeface.MONOSPACE)
-        setPadding((14 * d).toInt(), (10 * d).toInt(), (14 * d).toInt(), (10 * d).toInt())
-        setWidth((230 * d).toInt())
+        setImageResource(R.mipmap.ic_launcher)
+        setScaleType(ImageView.ScaleType.FIT_CENTER)
+        val marge = (4 * d).toInt()
+        setPadding(marge, marge, marge, marge)
         setFocusable(true)
         setFocusableInTouchMode(true)
+        setOutlineProvider(ViewOutlineProvider.BACKGROUND)
+        setClipToOutline(true)
         majAffichage()
     }
 
     private fun majAffichage() {
         val d = resources.displayMetrics.density
+        val couleur = if (Relais.etat != Relais.CONNECTE) {
+            "#e5484d"
+        } else if (focus) {
+            "#30c48d"
+        } else {
+            "#8b94a8"
+        }
         val fond = GradientDrawable()
-        fond.cornerRadius = 18 * d
-        fond.setColor(Color.parseColor(if (actif) "#1f9d6b" else "#555b6b"))
+        fond.shape = GradientDrawable.OVAL
+        fond.setColor(Color.parseColor("#181c25"))
+        fond.setStroke((4 * d).toInt(), Color.parseColor(couleur))
         setBackground(fond)
-        val statut = if (actif) "MANETTE ACTIVE" else "TOUCHE-MOI (manette en pause)"
-        setText(statut + "\n" + dernier + "\n" + nbSignaux + " signaux | " + appareil)
+        setAlpha(if (focus) 1f else 0.85f)
     }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
+        Relais.ajouterEcouteur(ecouteur)
         requestFocus()
+    }
+
+    override fun onDetachedFromWindow() {
+        Relais.retirerEcouteur(ecouteur)
+        super.onDetachedFromWindow()
     }
 
     override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
         super.onWindowFocusChanged(hasWindowFocus)
-        actif = hasWindowFocus
-        if (hasWindowFocus) requestFocus()
+        focus = hasWindowFocus
+        if (hasWindowFocus) {
+            requestFocus()
+        } else {
+            EntreeManette.toutRelacher()
+        }
         majAffichage()
     }
 
     // Boutons de la manette
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
-        val src = event.source
-        val manette = (src and InputDevice.SOURCE_GAMEPAD) == InputDevice.SOURCE_GAMEPAD ||
-            (src and InputDevice.SOURCE_DPAD) == InputDevice.SOURCE_DPAD ||
-            (src and InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK
-        if (!manette) return super.dispatchKeyEvent(event)
-
-        if (event.repeatCount == 0) {
-            nbSignaux++
-            appareil = event.device?.name ?: "?"
-            val nom = KeyEvent.keyCodeToString(event.keyCode).removePrefix("KEYCODE_")
-            dernier = nom + if (event.action == KeyEvent.ACTION_DOWN) " (appuye)" else " (relache)"
-            majAffichage()
-        }
-        return true
+        if (EntreeManette.touche(event)) return true
+        return super.dispatchKeyEvent(event)
     }
 
     // Sticks et gachettes de la manette
     override fun onGenericMotionEvent(event: MotionEvent): Boolean {
-        val src = event.source
-        val joystick = (src and InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK
-        if (joystick && event.action == MotionEvent.ACTION_MOVE) {
-            nbSignaux++
-            appareil = event.device?.name ?: "?"
-            dernier = String.format(
-                Locale.ROOT,
-                "G %.1f/%.1f  D %.1f/%.1f\nL2 %.1f  R2 %.1f",
-                event.getAxisValue(MotionEvent.AXIS_X), event.getAxisValue(MotionEvent.AXIS_Y),
-                event.getAxisValue(MotionEvent.AXIS_Z), event.getAxisValue(MotionEvent.AXIS_RZ),
-                event.getAxisValue(MotionEvent.AXIS_LTRIGGER), event.getAxisValue(MotionEvent.AXIS_RTRIGGER)
-            )
-            majAffichage()
-            return true
-        }
+        if (EntreeManette.mouvement(event)) return true
         return super.onGenericMotionEvent(event)
     }
 
