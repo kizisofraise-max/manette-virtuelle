@@ -215,7 +215,8 @@ class MainActivity : Activity() {
             texte(
                 "La bulle apparaît quand tu quittes l'application, par-dessus les autres applications, pour que ta manette continue de fonctionner. " +
                     "Quand cette application est ouverte, la bulle se cache.\n" +
-                    "Anneau vert : manette active. Gris : touche la bulle pour reprendre la manette. Rouge : pas connecté au PC.",
+                    "Rond vert : manette active. Gris : touche la bulle pour reprendre la manette. Rouge : pas connecté au PC.\n" +
+                    "Pour la retirer : fais glisser la bulle sur la croix qui apparaît en bas de l'écran, ou touche « Désactiver la bulle », ou ferme l'application depuis la liste des applications récentes.",
                 13f, "#8b94a8"
             )
         )

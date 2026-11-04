@@ -89,6 +89,14 @@ class BulleService : Service() {
         }
     }
 
+    // L'application est fermee depuis la liste des applications recentes :
+    // on retire la bulle et on coupe la connexion au PC.
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        Relais.deconnecter()
+        stopSelf()
+        super.onTaskRemoved(rootIntent)
+    }
+
     override fun onDestroy() {
         EntreeManette.toutRelacher()
         try {
