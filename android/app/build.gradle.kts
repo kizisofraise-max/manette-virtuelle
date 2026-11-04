@@ -11,8 +11,8 @@ android {
         applicationId = "fr.manettevirtuelle.bulle"
         minSdk = 26
         targetSdk = 34
-        versionCode = 3
-        versionName = "0.3"
+        versionCode = 4
+        versionName = "0.4"
     }
 
     // Cle de signature fixe : les nouvelles versions s'installent par-dessus l'ancienne

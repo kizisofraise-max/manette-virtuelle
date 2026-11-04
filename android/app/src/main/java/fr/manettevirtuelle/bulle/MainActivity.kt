@@ -136,7 +136,7 @@ class MainActivity : Activity() {
         val logo = ImageView(this)
         logo.setImageResource(R.mipmap.ic_launcher)
         logo.layoutParams = LinearLayout.LayoutParams(dp(52), dp(52))
-        val titre = texte("Manette Virtuelle", 24f, gras = true)
+        val titre = texte("Manette Virtuelle Phone", 22f, gras = true)
         titre.setPadding(dp(14), 0, 0, 0)
         entete.addView(logo)
         entete.addView(titre)

@@ -47,10 +47,7 @@ footer{padding:36px 0 50px;text-align:center;color:var(--mut);font-size:14px}
     <div class="boutons">
       <a class="btn prim" href="https://github.com/kizisofraise-max/manette-virtuelle/releases/latest">⬇ Télécharger pour Windows</a>
       <a class="btn sec" href="#don">☕ Soutenir le projet</a>
-      <!-- Quand l'application Android sera prête, enlève les marques de commentaire ci-dessous
-           et remplace LIEN_APK par le lien du fichier .apk :
-      <a class="btn sec" href="LIEN_APK">📱 Télécharger pour Android (bêta)</a>
-      -->
+      <a class="btn sec" href="#android">📱 Android (bêta)</a>
     </div>
     <p class="petit">Gratuit · Windows 10 et 11 · Le code source est public</p>
   </div>
@@ -61,7 +58,7 @@ footer{padding:36px 0 50px;text-align:center;color:var(--mut);font-size:14px}
     <h2>Comment ça marche</h2>
     <div class="grille">
       <div class="carte"><div class="num">1</div><h3>Installe sur ton PC</h3><p>Télécharge l'installateur et lance-le. Il installe aussi le pilote nécessaire pour que Windows reconnaisse la manette.</p></div>
-      <div class="carte"><div class="num">2</div><h3>Relie ta manette au téléphone</h3><p>Associe ta manette à ton téléphone en Bluetooth, comme d'habitude. Puis ouvre dans le navigateur du téléphone l'adresse affichée par le programme et tape le code à 4 chiffres.</p></div>
+      <div class="carte"><div class="num">2</div><h3>Relie ta manette au téléphone</h3><p>Associe ta manette à ton téléphone en Bluetooth, comme d'habitude. Puis ouvre l'application Manette Virtuelle Phone (Android) et tape le code à 4 chiffres affiché par le programme : elle trouve ton PC toute seule. Sur iPhone, ouvre dans Safari l'adresse affichée par le programme.</p></div>
       <div class="carte"><div class="num">3</div><h3>Joue sur ton PC</h3><p>Ton PC voit une manette de type Xbox 360. Elle fonctionne avec les jeux qui acceptent une manette.</p></div>
     </div>
   </div>
@@ -75,8 +72,21 @@ footer{padding:36px 0 50px;text-align:center;color:var(--mut);font-size:14px}
       <div class="carte"><h3>👆 Manette tactile en secours</h3><p>Pas de manette sous la main ? Utilise l'écran du téléphone : boutons, croix directionnelle, sticks et gâchettes.</p></div>
       <div class="carte"><h3>🔒 Protégé par un code</h3><p>Un nouveau code est généré à chaque lancement. Personne d'autre sur ton réseau ne peut prendre le contrôle.</p></div>
       <div class="carte"><h3>⚡ Faible latence</h3><p>La latence s'affiche en direct sur ton téléphone pour que tu saches où tu en es.</p></div>
-      <div class="carte"><h3>📱 Application Android (bientôt)</h3><p>Une application est en préparation pour garder la manette active pendant que tu utilises ton téléphone. En attendant, la page web du téléphone fonctionne comme avant.</p></div>
+      <div class="carte"><h3>📱 Application Android (bêta)</h3><p>Manette Virtuelle Phone trouve ton PC avec le seul code à 4 chiffres, et une bulle flottante garde la manette active quand tu utilises d'autres applications.</p></div>
     </div>
+  </div>
+</section>
+
+<section id="android">
+  <div class="wrap">
+    <h2>Manette Virtuelle Phone (Android)</h2>
+    <div class="grille">
+      <div class="carte"><div class="num">1</div><h3>Télécharge l'application</h3><p>Touche le bouton ci-dessous depuis ton téléphone Android. Le fichier s'appelle ManetteVirtuellePhone.apk.</p></div>
+      <div class="carte"><div class="num">2</div><h3>Autorise l'installation</h3><p>Android demande l'autorisation d'installer une application qui ne vient pas du Play Store. Accepte, puis ouvre le fichier téléchargé.</p></div>
+      <div class="carte"><div class="num">3</div><h3>Tape le code du PC</h3><p>Ouvre l'application et tape le code à 4 chiffres affiché par le programme sur le PC. Elle trouve ton PC toute seule sur le Wi-Fi.</p></div>
+    </div>
+    <p style="text-align:center;margin-top:24px"><a class="btn prim" href="https://github.com/kizisofraise-max/manette-virtuelle/releases/latest/download/ManetteVirtuellePhone.apk">⬇ Télécharger pour Android (bêta)</a></p>
+    <p class="petit" style="text-align:center">Version bêta, en cours de test. iPhone : pas encore d'application, utilise dans Safari l'adresse affichée par le programme sur le PC.</p>
   </div>
 </section>
 
@@ -94,11 +104,13 @@ footer{padding:36px 0 50px;text-align:center;color:var(--mut);font-size:14px}
     <details><summary>Mon PC n'a pas de Bluetooth, ça marche ?</summary>
       <p>Oui, c'est fait pour ça. Seul ton téléphone a besoin du Bluetooth. Le PC, lui, reçoit tout par le réseau : il doit simplement être sur le même Wi-Fi (ou relié par câble au même réseau) que le téléphone.</p></details>
     <details><summary>La manette s'arrête quand j'utilise une autre application sur le téléphone</summary>
-      <p>C'est une règle d'Android : la manette n'est envoyée qu'à l'application ou à la page qui est au premier plan. Garde donc la page Manette Virtuelle ouverte pendant que tu joues. Une application Android, qui pourra garder la manette active en arrière-plan, est en préparation.</p></details>
+      <p>C'est une règle d'Android : la manette n'est envoyée qu'à l'application ou à la page qui est au premier plan. Avec l'application Manette Virtuelle Phone, active la bulle flottante : elle garde la manette active quand tu quittes l'application, et tu la touches pour reprendre la manette après avoir utilisé autre chose. Avec la page web (iPhone), garde la page ouverte pendant que tu joues.</p></details>
+    <details><summary>Android bloque l'installation de l'application</summary>
+      <p>C'est normal : l'application ne vient pas du Play Store. Quand Android le propose, autorise ton navigateur ou ton gestionnaire de fichiers à installer des applications, puis relance l'installation. Google Play Protect peut afficher un avertissement pour les applications qu'il ne connaît pas : le code source est public si tu veux vérifier ce que fait l'application.</p></details>
     <details><summary>Quelles manettes sont compatibles ?</summary>
       <p>Celles que ton téléphone reconnaît en Bluetooth et que son navigateur sait lire. Les manettes courantes de type Xbox ou PlayStation fonctionnent généralement, mais ça peut varier selon le téléphone.</p></details>
     <details><summary>Ça marche sur Mac, Linux ou console ?</summary>
-      <p>Non, uniquement Windows pour l'instant. Le téléphone peut être un Android ou un iPhone, il suffit d'un navigateur.</p></details>
+      <p>Non, uniquement Windows pour le PC pour l'instant. Côté téléphone : une application pour Android (bêta), et la page web dans Safari pour iPhone.</p></details>
   </div>
 </section>
 

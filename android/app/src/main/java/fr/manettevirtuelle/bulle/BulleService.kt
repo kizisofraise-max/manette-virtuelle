@@ -44,7 +44,7 @@ class BulleService : Service() {
         )
         @Suppress("DEPRECATION")
         val notif = Notification.Builder(this, CANAL)
-            .setContentTitle("Manette Virtuelle")
+            .setContentTitle("Manette Virtuelle Phone")
             .setContentText("La bulle est affichée. Touche-la pour reprendre la manette.")
             .setSmallIcon(android.R.drawable.ic_menu_info_details)
             .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Arrêter", arret)

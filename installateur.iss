@@ -6,7 +6,7 @@
 
 [Setup]
 AppName=Manette Virtuelle
-AppVersion=1.1
+AppVersion=1.2
 AppPublisher=Manette Virtuelle
 DefaultDirName={autopf}\Manette Virtuelle
 DefaultGroupName=Manette Virtuelle

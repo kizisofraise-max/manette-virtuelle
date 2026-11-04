@@ -609,6 +609,7 @@ def ip_locale():
 
 
 IP_PC = ip_locale()
+URL_ANDROID = "https://kizisofraise-max.github.io/manette-virtuelle/#android"   # le QR code mène ici
 HOTES_OK = {"localhost", "127.0.0.1", "::1", IP_PC}
 
 
@@ -830,48 +831,57 @@ def fenetre():
                     font=("Segoe UI", 11))
     etat.pack(side="left", padx=(6, 0))
 
-    # Étape 1 : l'adresse
+    # Étape 1 : l'application Android (+ QR code pour l'installer)
     c1 = carte()
     c1.pack(fill="x", padx=28, pady=(16, 8))
-    tk.Label(c1, text="1.  Sur ton téléphone, ouvre cette adresse :", bg=CARTE, fg=MUT,
+    gauche = tk.Frame(c1, bg=CARTE)
+    gauche.pack(side="left", fill="both", expand=True)
+    tk.Label(gauche, text="1.  Sur ton téléphone Android,\nouvre l'application :", bg=CARTE, fg=MUT,
+             font=("Segoe UI", 11), anchor="w", justify="left").pack(fill="x")
+    tk.Label(gauche, text="Manette Virtuelle\nPhone", bg=CARTE, fg=ACC,
+             font=("Segoe UI", 18, "bold"), anchor="w", justify="left").pack(fill="x", pady=(6, 8))
+    tk.Label(gauche, text="Pas encore installée ?\nScanne le QR code pour la télécharger.",
+             bg=CARTE, fg=MUT, font=("Segoe UI", 10), anchor="w", justify="left").pack(fill="x")
+    donnees_qr = image_qr(URL_ANDROID)
+    if donnees_qr:
+        try:
+            photo = tk.PhotoImage(data=donnees_qr)
+            racine._photo_qr = photo             # garde l'image en vie
+            tk.Label(c1, image=photo, bg=CARTE).pack(side="right", padx=(14, 0))
+        except Exception:
+            pass
+
+    # Étape 2 : le code
+    c2 = carte()
+    c2.pack(fill="x", padx=28, pady=8)
+    tk.Label(c2, text="2.  Tape ce code dans l'application :", bg=CARTE, fg=MUT,
              font=("Segoe UI", 11), anchor="w").pack(fill="x")
-    tk.Label(c1, text=url, bg=CARTE, fg=ACC,
-             font=("Consolas", 18, "bold")).pack(pady=(8, 8))
-    bouton = tk.Button(c1, text="Copier l'adresse", bg="#2b3140", fg=TXT,
+    tk.Label(c2, text="  ".join(CODE), bg=CARTE, fg=TXT,
+             font=("Consolas", 50, "bold")).pack(pady=(4, 0))
+
+    # iPhone : pas encore d'application, on garde la page web
+    c3 = carte()
+    c3.pack(fill="x", padx=28, pady=(8, 8))
+    tk.Label(c3, text="iPhone : pas encore d'application. Dans Safari, ouvre :", bg=CARTE, fg=MUT,
+             font=("Segoe UI", 10), anchor="w").pack(fill="x")
+    ligne3 = tk.Frame(c3, bg=CARTE)
+    ligne3.pack(fill="x", pady=(6, 0))
+    tk.Label(ligne3, text=url, bg=CARTE, fg=ACC, font=("Consolas", 13, "bold")).pack(side="left")
+    bouton = tk.Button(ligne3, text="Copier", bg="#2b3140", fg=TXT,
                        activebackground="#3a4254", activeforeground=TXT, relief="flat",
-                       font=("Segoe UI", 10), padx=12, pady=4, cursor="hand2")
-    bouton.pack()
+                       font=("Segoe UI", 9), padx=10, pady=2, cursor="hand2")
+    bouton.pack(side="right")
 
     def copier():
         racine.clipboard_clear()
         racine.clipboard_append(url)
         bouton.config(text="Copié ✓")
-        racine.after(1500, lambda: bouton.config(text="Copier l'adresse"))
+        racine.after(1500, lambda: bouton.config(text="Copier"))
     bouton.config(command=copier)
-
-    # Étape 2 : le code
-    c2 = carte()
-    c2.pack(fill="x", padx=28, pady=8)
-    tk.Label(c2, text="2.  Tape ce code sur le téléphone :", bg=CARTE, fg=MUT,
-             font=("Segoe UI", 11), anchor="w").pack(fill="x")
-    tk.Label(c2, text="  ".join(CODE), bg=CARTE, fg=TXT,
-             font=("Consolas", 54, "bold")).pack(pady=(6, 0))
-
-    # QR code (facultatif)
-    donnees_qr = image_qr(url)
-    if donnees_qr:
-        try:
-            photo = tk.PhotoImage(data=donnees_qr)
-            racine._photo_qr = photo             # garde l'image en vie
-            tk.Label(racine, text="ou scanne ce QR code avec ton téléphone", bg=BG, fg=MUT,
-                     font=("Segoe UI", 10)).pack(pady=(10, 4))
-            tk.Label(racine, image=photo, bg=BG).pack()
-        except Exception:
-            pass
 
     tk.Label(racine, text="Le téléphone et le PC doivent être sur le même Wi-Fi.\n"
                           "Garde cette fenêtre ouverte pendant que tu joues. La fermer arrête le programme.",
-             bg=BG, fg=MUT, font=("Segoe UI", 9), justify="center").pack(padx=28, pady=(14, 20))
+             bg=BG, fg=MUT, font=("Segoe UI", 9), justify="center").pack(padx=28, pady=(10, 18))
 
     def maj():
         if erreur_serveur:
